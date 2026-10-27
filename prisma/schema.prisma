@@ -1,0 +1,66 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model State {
+  id        Int        @id @default(autoincrement())
+  stateCode Int        @unique
+  name      String
+  districts District[]
+}
+
+model District {
+  id           Int           @id @default(autoincrement())
+  districtCode Int           @unique
+  name         String
+  stateId      Int
+  state        State         @relation(fields: [stateId], references: [id])
+  subDistricts SubDistrict[]
+}
+
+model SubDistrict {
+  id              Int       @id @default(autoincrement())
+  subDistrictCode Int       @unique
+  name            String
+  districtId      Int
+  district        District  @relation(fields: [districtId], references: [id])
+  villages        Village[]
+}
+
+model Village {
+  id            Int         @id @default(autoincrement())
+  placeCode     Int
+  name          String
+  subDistrictId Int
+  subDistrict   SubDistrict @relation(fields: [subDistrictId], references: [id])
+
+  @@index([name(ops: raw("gin_trgm_ops"))], map: "village_name_trgm_idx", type: Gin)
+  @@index([subDistrictId], map: "village_subdistrict_idx")
+}
+
+model User {
+  id            Int        @id @default(autoincrement())
+  name          String
+  email         String     @unique
+  passwordHash  String
+  createdAt     DateTime   @default(now())
+  plan          String     @default("FREE")
+  apiKey        String?    @unique
+  apiSecretHash String?
+  apiUsages     ApiUsage[]
+}
+
+model ApiUsage {
+  id           Int      @id @default(autoincrement())
+  userId       Int?
+  endpoint     String
+  method       String
+  statusCode   Int
+  responseTime Int
+  createdAt    DateTime @default(now())
+  user         User?    @relation(fields: [userId], references: [id])
+}
