@@ -208,7 +208,8 @@ async def api_key_middleware(request: Request, call_next):
         "/openapi.json",
         "/redoc",
         "/auth/login",
-        "/auth/register"
+        "/auth/register",
+        "/api/states"
     }
 
     # Public endpoints don't need API key or secret
