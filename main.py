@@ -225,7 +225,19 @@ async def api_key_middleware(request: Request, call_next):
 
         if authorization and authorization.startswith("Bearer "):
             return await call_next(request)
+            
+    # Allow public read-only geography endpoints
+    path = request.url.path
 
+    if request.method == "GET" and (
+        path == "/api/states"
+        or path.startswith("/api/states/")
+        or path.startswith("/api/districts/")
+        or path.startswith("/api/subdistricts/")
+        or path == "/api/villages/search"
+    ):
+        return await call_next(request)
+        
     # Protect API endpoints
     if request.url.path.startswith("/api/"):
 
