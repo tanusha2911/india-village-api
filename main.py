@@ -1696,48 +1696,36 @@ def generate_api_credentials(
     summary="Get all Indian states and union territories",
     description="Returns the complete list of states and union territories available in the India Village API."
 )
-def get_states(
-    request: Request,
-    background_tasks: BackgroundTasks,
-    current_user: dict = Depends(get_current_or_b2b_user),
-    x_api_key: str = Header(None)
-):
-
+def get_states():
     start_time = time.time()
-
-    check_daily_limit(
-        user_id=current_user["id"],
-        plan=current_user["plan"]
-    )
-
     connection = None
     cursor = None
 
     try:
-
         connection = get_connection()
         cursor = connection.cursor()
 
+        # Check database connection
         ping_start = time.time()
         cursor.execute("SELECT 1")
         cursor.fetchone()
+
         print(
             "DATABASE PING TIME:",
             round((time.time() - ping_start) * 1000),
             "ms"
         )
 
+        # Fetch states
         query_start = time.time()
-        
-        cursor.execute(
-            """
+
+        cursor.execute("""
             SELECT
-            "stateCode",
-            name
+                "stateCode",
+                name
             FROM "State"
             ORDER BY name
-            """
-        )
+        """)
 
         execute_time = round((time.time() - query_start) * 1000)
         print("STATES EXECUTE TIME:", execute_time, "ms")
@@ -1747,38 +1735,20 @@ def get_states(
 
         fetch_time = round((time.time() - fetch_start) * 1000)
         print("STATES FETCH TIME:", fetch_time, "ms")
-        
+
         response_time = round((time.time() - start_time) * 1000)
 
+        # Get rate-limit information from middleware
         rate_limit_info = getattr(
-            request.state,
+            connection,
             "rate_limit",
-            {
-                "remaining": 0,
-                "limit": PLAN_RATE_LIMITS.get(
-                    current_user["plan"].upper(),
-                    PLAN_RATE_LIMITS["FREE"]
-                ),
-                "reset": None
-            }
+            None
         )
 
-        b2b_user_id = getattr(request.state, "b2b_user_id", None)
-
-        background_tasks.add_task(
-            record_api_usage,
-            user_id=b2b_user_id if b2b_user_id else current_user["id"],
-            endpoint="/api/states",
-            method="GET",
-            status_code=200,
-            response_time=response_time
-        )
-
+        # Return the response
         return {
             "success": True,
-
             "count": len(rows),
-
             "data": [
                 {
                     "state_code": row[0],
@@ -1786,43 +1756,48 @@ def get_states(
                 }
                 for row in rows
             ],
-
             "meta": {
                 "requestId": f"req_{uuid.uuid4().hex[:12]}",
-
                 "responseTime": response_time,
-
                 "rateLimit": {
-                    "remaining": rate_limit_info["remaining"],
-
-                    "limit": rate_limit_info["limit"],
-
+                    "remaining": (
+                        rate_limit_info.get("remaining")
+                        if rate_limit_info
+                        else None
+                    ),
+                    "limit": (
+                        rate_limit_info.get("limit")
+                        if rate_limit_info
+                        else None
+                    ),
                     "reset": (
-                        datetime.now(timezone.utc)
-                        + timedelta(
-                            seconds=rate_limit_info["reset"]
-                        )
-                    ).isoformat()
-                    if rate_limit_info["reset"] is not None
-                    else None
+                        (
+                            datetime.now(timezone.utc)
+                            + timedelta(
+                                seconds=rate_limit_info["reset"]
+                            )
+                        ).isoformat()
+                        if rate_limit_info
+                        and rate_limit_info.get("reset") is not None
+                        else None
+                    )
                 }
             }
         }
 
     except Exception as e:
-
         raise HTTPException(
             status_code=500,
             detail=f"Failed to fetch states: {str(e)}"
         )
 
     finally:
-
         if cursor:
             cursor.close()
 
         if connection:
             db_pool.putconn(connection)
+
 
 # ============================================================
 # GET DISTRICTS BY STATE
