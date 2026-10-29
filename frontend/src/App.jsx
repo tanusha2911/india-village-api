@@ -47,14 +47,17 @@ function App() {
   const [selectedUserIds, setSelectedUserIds] = useState([]);
   const [bulkPlan, setBulkPlan] = useState("PREMIUM");
 
-  // Get JWT token
-  const token = localStorage.getItem("access_token");
 
-  const authHeaders = {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  };
+  // Get JWT token
+  const token = localStorage.getItem("token");
+
+  const authHeaders = token && token !== "null" && token !== "undefined"
+    ? {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    : {};
 
   // Load data when page opens
   useEffect(() => {
