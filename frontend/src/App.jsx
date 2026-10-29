@@ -49,14 +49,13 @@ function App() {
 
 
   // Get JWT token
-  const token = localStorage.getItem("token");
-
+  const token = localStorage.getItem("access_token");
   const authHeaders = token && token !== "null" && token !== "undefined"
     ? {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
     : {};
 
   // Load data when page opens
