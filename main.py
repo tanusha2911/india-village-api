@@ -95,7 +95,8 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:5174",
-        "http://127.0.0.1:5174"
+        "http://127.0.0.1:5174",
+        "https://india-village-api-alpha.vercel.app",
     ],
     allow_credentials=True,
     allow_methods=["*"],
