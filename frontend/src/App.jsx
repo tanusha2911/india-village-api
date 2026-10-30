@@ -47,6 +47,9 @@ function App() {
   const [selectedUser, setSelectedUser] = useState(null);
   const [selectedUserIds, setSelectedUserIds] = useState([]);
   const [bulkPlan, setBulkPlan] = useState("PREMIUM");
+  const [isAuthenticated, setIsAuthenticated] = useState(
+    () => Boolean(localStorage.getItem("access_token"))
+  );
 
 
   // Get JWT token
@@ -59,8 +62,10 @@ function App() {
     }
     : {};
 
-  // Load data when page opens
+  // Load data after successful login
   useEffect(() => {
+    if (!isAuthenticated) return;
+    
     fetchStates();
     fetchDashboard();
     fetchAdminAnalytics();
@@ -71,7 +76,7 @@ function App() {
     fetchHourlyUsage();
     fetchAdminUsers();
     fetchUsage();
-  }, []);
+  }, [isAuthenticated]);
 
   // Load states
   const fetchStates = async () => {
@@ -332,6 +337,14 @@ function App() {
     }
   };
 
+  if (!isAuthenticated) {
+    return (
+      <Login
+        onLoginSuccess={() => setIsAuthenticated(true)}
+        />
+    );
+  }
+  
   return (
     <div className="container">
 
