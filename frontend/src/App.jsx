@@ -348,6 +348,15 @@ function App() {
   return (
     <div className="container">
 
+      <button
+        onClick={() => {
+          localStorage.removeItem("access_token");
+          setIsAuthenticated(false);
+        }}
+        >
+        Logout
+      </button>
+
       {/* Dashboard */}
       {dashboard && (
         <div className="card">
