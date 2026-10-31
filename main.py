@@ -1519,12 +1519,22 @@ def login_user(request: LoginRequest):
         )
 
     finally:
-
+        
         if cursor:
             cursor.close()
-
-        if connection:
-            db_pool.putconn(connection)
+            
+            if connection and db_pool:
+                try:
+                    if not connection.closed:
+                        connection.rollback()
+                        
+                        db_pool.putconn(
+                            connection,
+                            close=bool(connection.closed)
+                        )
+                
+                except Exception as e:
+                    print("CONNECTION RETURN ERROR:", e)
 
 # ============================================================
 # USER DASHBOARD
