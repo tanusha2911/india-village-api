@@ -46,14 +46,23 @@ Deployment
 📂 Project Structure
 
 india-village-api/
+
 │
+
 ├── frontend/
+
 │   └── src/
+
 │
+
 ├── main.py
+
 ├── requirements.txt
+
 ├── import_data.py
+
 ├── import_missing_2011.py
+
 └── README.md
 
 ⚙️ Installation and Setup
