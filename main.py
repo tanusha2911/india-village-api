@@ -2539,10 +2539,11 @@ def search_villages(
         }
 
     except Exception as e:
-
+        print("VILLAGE SEARCH ERROR:", e)
+        
         raise HTTPException(
             status_code=500,
-            detail=f"Village search failed: {str(e)}"
+            detail="Village search failed. Please try again later."
         )
 
     finally:
