@@ -195,10 +195,6 @@ async def rate_limit_middleware(request: Request, call_next):
 # API KEY SECURITY
 # ============================================================
 
-# ============================================================
-# API KEY SECURITY
-# ============================================================
-
 @app.middleware("http")
 async def api_key_middleware(request: Request, call_next):
 
@@ -1517,24 +1513,30 @@ def login_user(request: LoginRequest):
             status_code=500,
             detail=f"Login failed: {str(e)}"
         )
-
+        
     finally:
         
         if cursor:
-            cursor.close()
-            
-            if connection and db_pool:
-                try:
-                    if not connection.closed:
-                        connection.rollback()
-                        
-                        db_pool.putconn(
-                            connection,
-                            close=bool(connection.closed)
-                        )
+            try:
+                cursor.close()
+            except Exception as e:
+                print("CURSOR CLOSE ERROR:", e)
                 
-                except Exception as e:
-                    print("CONNECTION RETURN ERROR:", e)
+        if connection and db_pool:
+            try:
+                if connection.closed:
+                    db_pool.putconn(connection, close=True)
+                else:
+                    try:
+                        connection.rollback()
+                        db_pool.putconn(connection)
+                    except Exception as e:
+                        print("CONNECTION CLEANUP ERROR:", e)
+                        db_pool.putconn(connection, close=True)
+                    
+                    except Exception as e:
+                        print("CONNECTION RETURN ERROR:", e)
+    
 
 # ============================================================
 # USER DASHBOARD
