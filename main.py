@@ -49,10 +49,10 @@ PLAN_DAILY_LIMITS = {
 }
 RATE_LIMIT_WINDOW = 60
 
-JWT_SECRET_KEY = os.getenv(
-    "JWT_SECRET_KEY",
-    "change-this-secret-key"
-)
+JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
+
+if not JWT_SECRET_KEY:
+    raise RuntimeError("JWT_SECRET_KEY environment variable is missing")
 
 API_KEY = os.getenv("API_KEY")
 API_SECRET = os.getenv("API_SECRET")
