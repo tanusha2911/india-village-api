@@ -268,7 +268,14 @@ async def api_key_middleware(request: Request, call_next):
 
         except Exception as e:
             print("B2B API KEY CHECK ERROR:", e)
-            b2b_user = None
+            
+            return JSONResponse(
+                status_code=503,
+                content={
+                    "success": False,
+                    "error": "Authentication service temporarily unavailable"
+                }
+            )
 
         finally:
             if cursor:
