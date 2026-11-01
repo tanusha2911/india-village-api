@@ -1533,9 +1533,8 @@ def login_user(request: LoginRequest):
                     except Exception as e:
                         print("CONNECTION CLEANUP ERROR:", e)
                         db_pool.putconn(connection, close=True)
-                    
-                    except Exception as e:
-                        print("CONNECTION RETURN ERROR:", e)
+            except Exception as e:
+                print("CONNECTION RETURN ERROR:", e)
     
 
 # ============================================================
