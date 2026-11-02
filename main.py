@@ -1637,17 +1637,22 @@ def get_usage_history(
         }
 
     except Exception as e:
+        print("DASHBOARD USAGE ERROR:", e)
+        
         raise HTTPException(
             status_code=500,
             detail=f"Failed to fetch usage history: {str(e)}"
         )
 
     finally:
-        if cursor:
-            cursor.close()
-
-        if connection:
-            db_pool.putconn(connection)
+        try:
+            if cursor:
+                cursor.close()
+                
+        finally:
+            if connection:
+                db_pool.putconn(connection)
+                
 
 @app.post("/dashboard/api-credentials")
 def generate_api_credentials(
