@@ -1641,7 +1641,7 @@ def get_usage_history(
         
         raise HTTPException(
             status_code=500,
-            detail=f"Failed to fetch usage history: {str(e)}"
+            detail="Unable to fetch usage history. Please try again later."
         )
 
     finally:
