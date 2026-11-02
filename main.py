@@ -278,11 +278,12 @@ async def api_key_middleware(request: Request, call_next):
             )
 
         finally:
-            if cursor:
-                cursor.close()
-
-            if connection:
-                db_pool.putconn(connection)
+            try:
+                if cursor:
+                    cursor.close()
+            finally:
+                if connection:
+                    db_pool.putconn(connection)
 
         # Registered B2B API key
         if b2b_user:
